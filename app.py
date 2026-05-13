@@ -2,10 +2,6 @@ import streamlit as st
 import pandas as pd
 from geopy.distance import geodesic
 
-# ============================
-# EMBEDDED DATABASES
-# ============================
-
 # Cars Database
 cars_data = [
     ["make", "model", "tank_capacity_l", "l_100km_highway", "l_100km_city", "curb_weight_kg", "max_payload_kg", "min_octane"],
@@ -274,13 +270,53 @@ cities_data = [
     ["Gwadar", 25.126389, 62.322498],
     ["Quetta", 30.18414, 67.00141],
     ["Hyderabad", 25.39689, 68.37718],
+    ["Cairo", 30.0444, 31.2357],
+    ["Alexandria", 31.2001, 29.9187],
+    ["Giza", 30.0131, 31.2089],
+    ["Istanbul", 41.0082, 28.9784],
+    ["Ankara", 39.9334, 32.8597],
+    ["Izmir", 38.4189, 27.1287],
+    ["Bursa", 40.1885, 29.0610],
+    ["Antalya", 36.8969, 30.7133],
+    ["Abha", 18.2164, 42.5053],
+    ["Taif", 21.4374, 40.5128],
+    ["Hail", 27.5219, 41.6907],
+    ["Buraydah", 26.3260, 43.9745],
+    ["Najran", 17.5656, 44.2219],
+    ["Jizan", 16.8892, 42.5611],
+    ["Karbala", 32.6160, 44.0249],
+    ["Amarah", 31.8417, 47.1512],
+    ["Ramadi", 33.4258, 43.2995],
+    ["Tabriz", 38.0800, 46.2919],
+    ["Ahvaz", 31.3183, 48.6706],
+    ["Kermanshah", 34.3142, 47.0650],
+    ["Qom", 34.6401, 50.8764],
+    ["Rasht", 37.2808, 49.5832],
+    ["Kerman", 30.2839, 57.0838],
+    ["Ibri", 23.2257, 56.5157],
+    ["Manama", 26.2235, 50.5876],
+    ["Riffa", 26.1297, 50.5550],
+    ["Muharraq", 26.2572, 50.6119],
+    ["Rawalpindi", 33.5651, 73.0169],
+    ["Multan", 30.1575, 71.5249],
+    ["Peshawar", 34.0150, 71.5249],
+    ["Faisalabad", 31.4180, 73.0790],
+    ["Beirut", 33.8938, 35.5018],
+    ["Amman", 31.9454, 35.9284],
+    ["Zarqa", 32.0836, 36.1000],
+    ["Damascus", 33.5138, 36.2765],
+    ["Aleppo", 36.2021, 37.1343],
+    ["Gaza", 31.5017, 34.4668],
+    ["Jerusalem", 31.7683, 35.2137],
+    ["Sana'a", 15.3694, 44.1910],
+    ["Aden", 12.7855, 45.0187]
 ]
 
 # Create DataFrames
 cars_df = pd.DataFrame(cars_data[1:], columns=cars_data[0])
 cities_df = pd.DataFrame(cities_data[1:], columns=cities_data[0])
 
-# --- Helper ---
+# Helper
 def clean_numeric(val):
     try:
         return float(str(val).split()[0])
@@ -296,7 +332,7 @@ cars_df["min_octane"] = pd.to_numeric(cars_df["min_octane"], errors="coerce")
 
 st.set_page_config(page_title="Strategic Fuel Intelligence", layout="wide")
 
-# --- Sidebar ---
+# Sidebar
 st.sidebar.header("⚙️ Trip Parameters")
 
 start_city = st.sidebar.selectbox("Start City", sorted(cities_df["city_ascii"].unique()))
@@ -311,7 +347,7 @@ extra_weight = st.sidebar.number_input("Extra Payload (kg)", min_value=0, step=5
 traffic_multiplier = st.sidebar.slider("Traffic / Checkpoint Multiplier", 1.0, 2.0, 1.2)
 climate_hot = st.sidebar.checkbox("Extreme Heat (≥40°C) + AC")
 
-# --- Safe Data Retrieval ---
+# Safe Data Retrieval
 start_df = cities_df[cities_df["city_ascii"] == start_city]
 end_df = cities_df[cities_df["city_ascii"] == end_city]
 car_df = cars_df[(cars_df["make"] == car_make) & (cars_df["model"] == car_model)]
@@ -335,7 +371,7 @@ if pd.isna(tank_capacity) or pd.isna(l_100km_highway) or tank_capacity <= 0 or l
     st.error("❌ Sorry! Invalid or missing car specifications.")
     st.stop()
 
-# --- Calculations ---
+# Calculations
 base_distance = geodesic(start_coords, end_coords).km
 road_distance = base_distance * 1.3
 
@@ -344,9 +380,9 @@ fuel *= traffic_multiplier
 if climate_hot:
     fuel *= 1.15
 fuel *= (1 + 0.015 * (extra_weight // 50))
-fuel *= 1.15  # crisis reserve
+fuel *= 1.15  # extra reserve for emergencies
 
-# --- Dashboard ---
+# Dashboard
 st.title("⛽ Fuel Route Planner")
 
 col1, col2, col3 = st.columns(3)
